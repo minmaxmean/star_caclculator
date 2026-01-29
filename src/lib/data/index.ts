@@ -4,6 +4,33 @@ export type EnergyTier = (typeof ENERGY_TIERS)[number];
 
 const energyTierIndexOf = (tier: EnergyTier): number | null => ENERGY_TIERS.indexOf(tier) ?? null;
 
+export const isEnergyTier = (str: string): str is EnergyTier =>
+  energyTierIndexOf(str as EnergyTier) != null;
+
+export function isEnergyTierBetween(
+  val: EnergyTier,
+  minTier?: EnergyTier,
+  maxTier?: EnergyTier,
+): boolean {
+  const valIndex = energyTierIndexOf(val);
+  if (valIndex == null) {
+    return false;
+  }
+  if (minTier) {
+    const minIndex = energyTierIndexOf(minTier);
+    if (minIndex != null && valIndex < minIndex) {
+      return false;
+    }
+  }
+  if (maxTier) {
+    const maxIndex = energyTierIndexOf(maxTier);
+    if (maxIndex != null && maxIndex < valIndex) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function SpeedCoeficient(recipeTier: EnergyTier, machineTier: EnergyTier): number | null {
   const recipeIndex = energyTierIndexOf(recipeTier);
   if (recipeIndex == null) {

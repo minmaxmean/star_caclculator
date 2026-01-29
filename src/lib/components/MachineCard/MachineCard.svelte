@@ -1,20 +1,15 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card';
-  import * as Select from '$lib/components/ui/select';
-  import { machineSpeed, type EnergyTier, type Recipe } from '$lib/data';
+  import { machineSpeed, type EnergyTier } from '$lib/data';
+  import EnergyTierSelector from '../EnergyTierSelector/EnergyTierSelector.svelte';
+  import { type MachineCardProps } from './index.ts';
 
-  const recipe: Recipe = {
-    name: 'Pyrolyse Oven',
-    input: { name: 'Charcoal', amount: 1 },
-    output: { name: 'Charcoal Dust', amount: 1 },
-    baseTimeSec: 0.6,
-    baseTier: 'ULV',
-    baseEnergyConsumption: 2,
-  };
-  const selectedTier: EnergyTier = 'MV';
-  const actualTimeSec = machineSpeed(recipe, selectedTier);
-  const machineCnt = 1;
-  console.log({ recipe, selectedTier, actualTimeSec, machineCnt });
+  const { recipe, machineCount }: MachineCardProps = $props();
+
+  // This is intentional, it should use recipe tier as inital value
+  //  svelte-ignore state_referenced_locally
+  let selectedTier = $state<EnergyTier>(recipe.baseTier);
+  const actualTimeSec = $derived(selectedTier ? machineSpeed(recipe, selectedTier) : null);
 </script>
 
 <Card.Root class="w-full max-w-sm">
@@ -58,32 +53,22 @@
 
   <div>
     <div class="bg-blue-400 text-center text-white">Selected:</div>
-
     <div class="grid grid-cols-4 items-center gap-1">
       <div class="col-span-2 text-right"><div>Voltage Tier:</div></div>
       <div class="col-span-2 m-1">
-        <Select.Root type="single">
-          <Select.Trigger class="w-full">
-            {selectedTier}
-          </Select.Trigger>
-          <Select.Content>
-            <Select.Item value="ULV">ULV</Select.Item>
-            <Select.Item value="LV">LV</Select.Item>
-            <Select.Item value="MV">MV</Select.Item>
-          </Select.Content>
-        </Select.Root>
+        <EnergyTierSelector bind:value={selectedTier} initValue={recipe.baseTier} />
       </div>
     </div>
 
     <div class="grid grid-cols-4 gap-1">
       <div class="col-span-2 text-right">Time:</div>
-      <div class="col-span-1 text-right">{actualTimeSec}</div>
+      <div class="col-span-1 text-right">{actualTimeSec ?? '???'}</div>
       <div class="col-span-1">sec</div>
     </div>
 
     <div class="grid grid-cols-4 gap-1">
       <div class="col-span-2 text-right">Number of machines:</div>
-      <div class="col-span-1 text-right">{machineCnt}</div>
+      <div class="col-span-1 text-right">{machineCount}</div>
     </div>
   </div>
 </Card.Root>
